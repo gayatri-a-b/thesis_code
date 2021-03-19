@@ -309,11 +309,27 @@ class OneStep:
 
 ## TEST ITERATIONS
 # test iterations
-iterations = 2000
+iterations = 1000
 
 OS = OneStep()
 (updated_pi_0_gb, updated_pi_1_gb, bank_profit_iterated_gb, earth_mover_distance_initial_gb, earth_mover_distance_after_gb, change_average_pi_1_gb) = OS.iterate(iterations, OS.gb_one_step)
 (updated_pi_0_max_util, updated_pi_1_max_util, bank_profit_iterated_max_util, earth_mover_distance_initial_max_util, earth_mover_distance_after_max_util, change_average_pi_1_max_util) = OS.iterate(iterations, OS.max_one_step)
+
+print('Iterations: ' + str(iterations))
+
+print("GB Policy")
+print('bank profit: ' + str(bank_profit_iterated_gb))
+print('intial earth movers dist btwn pi_0 and pi_1: ' + str(earth_mover_distance_initial_gb))
+print('final earth movers dist btwn updated pi_0 and updated pi_1: ' + str(earth_mover_distance_after_gb))
+print('change in pi_1s average credit score: ' + str(change_average_pi_1_gb))
+
+print("")
+
+print("Max Util Policy")
+print('bank profit: ' + str(bank_profit_iterated_max_util))
+print('intial earth movers dist btwn pi_0 and pi_1: ' + str(earth_mover_distance_initial_max_util))
+print('final earth movers dist btwn updated pi_0 and updated pi_1: ' + str(earth_mover_distance_after_max_util))
+print('change in pi_1s average credit score: ' + str(change_average_pi_1_max_util))
 
 '''
 updated_pi_0 = updated_pi_0_gb
@@ -327,7 +343,7 @@ updated_pi_1 = updated_pi_1_max_util
 folder_0 = 'max-charts-iterations-group-0/'
 folder_1 = 'max-charts-iterations-group-1/'
 
-
+'''
 for ind, arr in enumerate(updated_pi_0):
     iterations_ = ind
 
@@ -362,3 +378,4 @@ for ind, arr in enumerate(updated_pi_1):
         plt.title('Group 1 ' + str(iterations_) + " Iterations")
         plt.savefig(folder_1 + str(iterations_) + '.png')
         plt.clf()
+'''
