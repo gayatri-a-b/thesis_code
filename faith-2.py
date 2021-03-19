@@ -1,6 +1,7 @@
 import numpy
 import pandas
 import matplotlib.pyplot as plt
+from scipy.stats import wasserstein_distance
 
 # metrics: bank's profit
 # how much disadvantaged group catches (ad - disad, earth mover)
@@ -33,6 +34,10 @@ class OneStep:
         self.interest_rate = interest_rate
         self.bank_cash = bank_cash
         self.bank_minimum = bank_cash
+
+        self.initial_pi_0 = pi_0
+        self.initial_pi_1 = pi_1
+        self.initial_bank_cash = bank_cash
 
 
 ##### return an individual and their outcome
@@ -249,7 +254,7 @@ class OneStep:
         # if person exists
         if (loan == 1):
             # calculate expected update
-            bank_cash_update = self.max_expected_update(group, decile)
+            bank_cash_update = self.max_util_expected_update(group, decile)
 
             if (bank_cash_update >= 0):
                 loan_decision = 1
@@ -267,7 +272,7 @@ class OneStep:
 
 
 ##### update specific number of times
-    def iterate(self, iterations):
+    def iterate(self, iterations, funct):
         updated_pi_0 = []
         updated_pi_1 = []
         updated_bank_cash = []
@@ -277,18 +282,28 @@ class OneStep:
 
         # only count successful updates
         while (i < iterations):
-            self.gb_one_step()
+            funct()
 
             updated_pi_0.append(self.pi_0)
             updated_pi_1.append(self.pi_1)
             updated_bank_cash.append(self.bank_cash)
 
-            print(self.pi_0)
+####            #print(self.pi_0)
 
             i += 1
 
+        # profit
+        bank_profit_iterated = self.bank_cash - self.initial_bank_cash
+
+        # disadvantaged group catch up
+        earth_mover_distance_initial = wasserstein_distance(self.initial_pi_0, self.initial_pi_1)
+        earth_mover_distance_after = wasserstein_distance(self.pi_0, self.pi_1)
+
+        # level-ing down
+        change_average_pi_1 = self.average_score(self.pi_1) - self.average_score(self.initial_pi_1)
+
         # updated 
-        return (updated_pi_0, updated_pi_1, updated_bank_cash)
+        return (updated_pi_0, updated_pi_1, bank_profit_iterated, earth_mover_distance_initial, earth_mover_distance_after, change_average_pi_1)
 
 
 
@@ -297,7 +312,20 @@ class OneStep:
 iterations = 2000
 
 OS = OneStep()
-(updated_pi_0, updated_pi_1, updated_bank_cash) = OS.iterate(iterations)
+(updated_pi_0_gb, updated_pi_1_gb, bank_profit_iterated_gb, earth_mover_distance_initial_gb, earth_mover_distance_after_gb, change_average_pi_1_gb) = OS.iterate(iterations, OS.gb_one_step)
+(updated_pi_0_max_util, updated_pi_1_max_util, bank_profit_iterated_max_util, earth_mover_distance_initial_max_util, earth_mover_distance_after_max_util, change_average_pi_1_max_util) = OS.iterate(iterations, OS.max_one_step)
+
+'''
+updated_pi_0 = updated_pi_0_gb
+updated_pi_1 = updated_pi_1_gb
+folder_0 = 'gb-charts-iterations-group-0/'
+folder_1 = 'gb-charts-iterations-group-1/'
+'''
+
+updated_pi_0 = updated_pi_0_max_util
+updated_pi_1 = updated_pi_1_max_util
+folder_0 = 'max-charts-iterations-group-0/'
+folder_1 = 'max-charts-iterations-group-1/'
 
 
 for ind, arr in enumerate(updated_pi_0):
@@ -314,7 +342,7 @@ for ind, arr in enumerate(updated_pi_0):
         plt.ylabel('Number of People')
         plt.xlabel('Credit Score')
         plt.title('Group 0 ' + str(iterations_) + " Iterations")
-        plt.savefig('charts-iterations/group_0_' + str(iterations_) + '.png')
+        plt.savefig(folder_0 + str(iterations_) + '.png')
         plt.clf()
 
 
@@ -332,5 +360,5 @@ for ind, arr in enumerate(updated_pi_1):
         plt.ylabel('Number of People')
         plt.xlabel('Credit Score')
         plt.title('Group 1 ' + str(iterations_) + " Iterations")
-        plt.savefig('charts-iterations/group_1_' + str(iterations_) + '.png')
+        plt.savefig(folder_1 + str(iterations_) + '.png')
         plt.clf()
