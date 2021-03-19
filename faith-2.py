@@ -70,7 +70,7 @@ class OneStep:
         return average
 
 
-##### return expected change in bank cash (above minimum) and average credit score
+##### return expected change in bank cash (above minimum) and average credit score -- gb agent
     def gb_expected_update(self, group, decile):
         # copies of variables
         pi_0_repaid = self.pi_0.copy()
@@ -141,6 +141,25 @@ class OneStep:
         return ((bank_cash_update, average_update))
 
 
+##### return expected change in bank cash -- max util agent
+    def max_util_expected_update(self, group, decile):
+        # copies of variables
+        certainty_0 = self.certainty_0.copy()
+        certainty_1 = self.certainty_1.copy()
+
+        ## expected bank amount (above minimum)
+        if group == 0:
+            repayment_certainty_bc = certainty_0[decile] # bin repayment certainty
+        else:
+            repayment_certainty_bc = certainty_1[decile] # bin repayment certainty
+
+        # expectation of bank money after loan
+        bank_cash_update = repayment_certainty_bc * self.loan_amount * self.interest_rate + (1 - repayment_certainty_bc) * ( -1 * self.loan_amount )
+
+        # return expected bank profit
+        return (bank_cash_update)
+
+
 ##### return actual update
     def actual_update(self, group, decile, loan_decision, repayment_truth):
         # current variable copies
@@ -195,7 +214,7 @@ class OneStep:
         return ((pi_0_copy, pi_1_copy, bank_cash_current))
 
 
-##### take one step
+##### take one step -- gb agent
     def gb_one_step(self):
         # get person
         (group, decile, repayment_truth, loan) = self.get_person()
@@ -208,6 +227,31 @@ class OneStep:
             if ((bank_cash_update >= 0) and (average_update >= 0)):
                 loan_decision = 1
             elif (decile == 6):
+                loan_decision = 1
+            else:
+                loan_decision = 0
+
+            # if loaned then update:
+            if (loan_decision == 1):
+                (pi_0_copy, pi_1_copy, bank_cash_current) = self.actual_update(group, decile, loan_decision, repayment_truth)
+
+                # update
+                self.pi_0 = pi_0_copy
+                self.pi_1 = pi_1_copy
+                self.bank_cash = bank_cash_current
+
+
+##### take one step -- max util agent
+    def max_one_step(self):
+        # get person
+        (group, decile, repayment_truth, loan) = self.get_person()
+
+        # if person exists
+        if (loan == 1):
+            # calculate expected update
+            bank_cash_update = self.max_expected_update(group, decile)
+
+            if (bank_cash_update >= 0):
                 loan_decision = 1
             else:
                 loan_decision = 0
