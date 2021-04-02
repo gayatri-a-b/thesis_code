@@ -16,14 +16,14 @@ numpy.random.seed(10)
 class OneStep:
 ##### constructor
     def __init__( self, 
-                  pi_0 = [10, 10, 20, 30, 30, 0, 0],
-                  pi_1 = [0, 10, 10, 20, 30, 30, 0],
-                  certainty_0 = [0.1, 0.2, 0.45, 0.6, 0.65, 0.7, 0.7],
-                  certainty_1 = [0.1, 0.2, 0.45, 0.6, 0.65, 0.7, 0.7],
-                  group_chance = 0.5,
-                  loan_amount = 10,
-                  interest_rate = 1, #1 in paper
-                  bank_cash = 10000 
+                    pi_0 = [10, 10, 20, 30, 30, 0, 0], # starting distribution for group 0 (disadvantaged group)
+                    pi_1 = [0, 10, 10, 20, 30, 30, 0], # starting distribution for group 1 (advantaged group)
+                    certainty_0 = [0.1, 0.2, 0.45, 0.6, 0.65, 0.7, 0.7], # repayment certainty for group 0 (disadvantaged group),
+                    certainty_1 = [0.1, 0.2, 0.45, 0.6, 0.65, 0.7, 0.7], # repayment certainty for group 1 (advantaged group), same for both groups in the model
+                    group_chance = 0.5, # change of picking each group
+                    loan_amount = 10, # amount requested on every loan
+                    interest_rate = 1, # interest rate on every loan
+                    bank_cash = 10000 # bank starting cash
                 ):
     
         # store variables
