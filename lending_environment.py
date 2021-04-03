@@ -670,15 +670,15 @@ successful_loans_total_1_eo_no_limit_ = []
 
 
 # time steps
-iterations = 1000
+iterations = 100
 
 # average over multiple runs
 counts_to_average_over = 30
 
 
 # example case
-pi_0 = [10, 10, 20, 30, 30, 0, 0]
-pi_1 = [0, 10, 10, 20, 30, 30, 0]
+pi_0_test = [10, 10, 20, 30, 30, 0, 0]
+pi_1_test = [0, 10, 10, 20, 30, 30, 0]
 
 # for active harm
 #pi_0_test = [60, 10, 0, 0, 0, 0, 30]
