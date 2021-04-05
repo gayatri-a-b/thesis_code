@@ -5,10 +5,8 @@ import random
 from scipy import optimize
 from scipy.stats import wasserstein_distance
 
-### READER: tests begin at LINE 672. Begin there.
+### READER: tests begin at LINE 705. Begin there.
 
-
-# seed the random number generator
 numpy.random.seed(10)
 
 
@@ -22,7 +20,7 @@ class OneStep:
                     certainty_1 = [0.1, 0.2, 0.45, 0.6, 0.65, 0.7, 0.7], # repayment certainty for group 1 (advantaged group), same for both groups in the model
                     group_chance = 0.5, # change of picking each group
                     loan_amount = 10, # amount requested on every loan
-                    interest_rate = 1, # interest rate on every loan
+                    interest_rate = 2, # interest rate on every loan
                     bank_cash = 10000 # bank starting cash
                 ):
     
@@ -50,6 +48,7 @@ class OneStep:
 
         self.total_individuals_0 = 0
         self.total_individuals_1 = 0
+
 
 
 ########################### GENERAL FUNCTIONS
@@ -283,27 +282,29 @@ class OneStep:
 
         # for each individual in group 0
         for decile, bin_count in enumerate(self.pi_0):
-            # set bin selection
-            if decile < whole_0:
-                bin_selection = 0
-            elif decile == whole_0:
-                bin_selection = 1 - decimal_0
-            elif decile > whole_0:
-                bin_selection = 1
+            for i in range(bin_count):
+                # set bin selection
+                if decile < whole_0:
+                    bin_selection = 0
+                elif decile == whole_0:
+                    bin_selection = 1 - decimal_0
+                elif decile > whole_0:
+                    bin_selection = 1
 
-            numerator_0 += bin_selection*(self.certainty_0[decile]*self.interest_rate*self.loan_amount + (1 - self.certainty_0[decile])*(-1 * self.loan_amount))
+                numerator_0 += bin_selection*(self.certainty_0[decile]*self.interest_rate*self.loan_amount + (1 - self.certainty_0[decile])*(-1 * self.loan_amount))
         
         # for each individual in group 1
         for decile, bin_count in enumerate(self.pi_1):
-            # set bin selection
-            if decile < whole_1:
-                bin_selection = 0
-            elif decile == whole_1:
-                bin_selection = 1 - decimal_1
-            elif decile > whole_1:
-                bin_selection = 1
+            for i in range(bin_count):
+                # set bin selection
+                if decile < whole_1:
+                    bin_selection = 0
+                elif decile == whole_1:
+                    bin_selection = 1 - decimal_1
+                elif decile > whole_1:
+                    bin_selection = 1
 
-            numerator_1 += bin_selection*(self.certainty_1[decile]*self.interest_rate*self.loan_amount + (1 - self.certainty_1[decile])*(-1 * self.loan_amount))
+                numerator_1 += bin_selection*(self.certainty_1[decile]*self.interest_rate*self.loan_amount + (1 - self.certainty_1[decile])*(-1 * self.loan_amount))
         
         # final number to optimize
         number = (numerator_0 + numerator_1) / (numpy.sum(self.pi_0) + numpy.sum(self.pi_1))
@@ -318,13 +319,15 @@ class OneStep:
         index = next(x for x, val in enumerate(self.certainty_0) if val >= 0.5)
         upper_bin = self.certainty_0[index]
         lower_bin = self.certainty_0[index - 1]
-        t_0_lower_limit = (0.5 - upper_bin) / (lower_bin - upper_bin)
+        t_0_lower_limit = index - (0.5 - upper_bin) / (lower_bin - upper_bin)
+
 
         if (t_0_lower_limit_given):
             t_0_lower_limit = 0.0
 
+
         # run the threshold optimization
-        res = optimize.minimize(self.helper_function_to_optimize, 4.5, bounds=[(t_0_lower_limit,7)])
+        res = optimize.minimize_scalar(self.helper_function_to_optimize, 4.5, bounds=(t_0_lower_limit, 7), method='bounded')
         t_0 = res.x
         
         # get the roc curve's major points for group 0 and group 1
@@ -336,6 +339,7 @@ class OneStep:
 
         # get the threshold for group 1 given a tpr
         t_1 = self.helper_threshold (roc_1, tpr)
+
 
         # return the two thresholds
         return (t_0, t_1)
@@ -415,10 +419,10 @@ class OneStep:
         # get person
         (group, decile, repayment_truth, loan) = self.get_person()
 
-        # increment which group individual is from
-        if group == 0:
+        # increment which group individual is from (loan == 1 is check to make sure individual exists)
+        if (group == 0 and loan == 1):
             self.total_individuals_0 += 1
-        else:
+        elif (group == 1 and loan == 1)::
             self.total_individuals_1 += 1
 
         # if person exists
@@ -520,6 +524,18 @@ class OneStep:
                 self.pi_0 = pi_0_copy
                 self.pi_1 = pi_1_copy
                 self.bank_cash = bank_cash_current
+            """
+            if(repayment_truth == 0 and loan_decision == 1):
+                print("loaned but did not repay")
+                print(self.bank_cash)
+                print(str(group) + "   " + str(decile))
+                print("")
+            elif (repayment_truth == 1 and loan_decision == 1):
+                print("Repaid!")
+                print(self.bank_cash)
+                print(str(group) + "   " + str(decile))
+                print("")
+            """
 
 
 ########################### STEPS OF ENVIRONMENT
@@ -554,6 +570,7 @@ class OneStep:
         ## METRICS
         # profit
         bank_profit_iterated = self.bank_cash - self.initial_bank_cash
+
 
         # distribution changes
         earth_mover_distance_initial = wasserstein_distance(u_values=[1,2,3,4,5,6,7],
@@ -700,16 +717,22 @@ pi_1_test = [0, 10, 10, 20, 30, 30, 0]
 #pi_0_test = [60, 10, 0, 0, 0, 0, 30]
 #pi_1_test  = [0, 0, 40, 10, 0, 0, 50]
 
+bank_cash_test = 10000
 
 # run each agent for the iterations number of time steps, but counts_to_average_over times
 # take average over counts_to_average_over times to determine outcome at iterations time steps
 for i in range(counts_to_average_over):
-    print('iteration: ' + str(i))
+    if ((i + 1) % 5 == 0):
+        print('iteration: ' + str(i))
 
+    # COPY THE AGENT YOU WISH TO RUN HERE, ONLY RUN ONE AGENT AT A TIME
+
+
+    """
     ## GB Agent 
     # loans if expectated outcome of loan decision does not decrease group's average credit score
     # and bank cash does not dip before its minimum amount
-    OS_gb = OneStep(pi_0 = pi_0_test, pi_1 = pi_1_test)
+    OS_gb = OneStep(pi_0 = pi_0_test, pi_1 = pi_1_test, bank_cash = bank_cash_test)
     (updated_pi_0_gb, updated_pi_1_gb, bank_profit_iterated_gb, earth_mover_distance_initial_gb, earth_mover_distance_after_gb, earth_mover_distance_0_gb, earth_mover_distance_1_gb, change_average_pi_0_gb, change_average_pi_1_gb, total_loans_0_gb, total_loans_1_gb, successful_loans_0_gb, successful_loans_1_gb, successful_loans_total_0_gb, successful_loans_total_1_gb) = OS_gb.iterate(iterations, OS_gb.gb_one_step, False)
 
     bank_profit_iterated_gb_.append(bank_profit_iterated_gb)
@@ -725,11 +748,12 @@ for i in range(counts_to_average_over):
     successful_loans_1_gb_.append(successful_loans_1_gb)
     total_loans_0_gb_.append(total_loans_0_gb)
     total_loans_1_gb_.append(total_loans_1_gb)
+    
 
-
+    
     ## Max Util Agent 
     # loans if expected outcome of loan decisions does not decrease total bank cash
-    OS_max_util = OneStep(pi_0 = pi_0_test, pi_1 = pi_1_test)
+    OS_max_util = OneStep(pi_0 = pi_0_test, pi_1 = pi_1_test, bank_cash = bank_cash_test)
     (updated_pi_0_max_util, updated_pi_1_max_util, bank_profit_iterated_max_util, earth_mover_distance_initial_max_util, earth_mover_distance_after_max_util, earth_mover_distance_0_max_util, earth_mover_distance_1_max_util, change_average_pi_0_max_util, change_average_pi_1_max_util, total_loans_0_max_util, total_loans_1_max_util, successful_loans_0_max_util, successful_loans_1_max_util, successful_loans_total_0_max_util, successful_loans_total_1_max_util) = OS_max_util.iterate(iterations, OS_max_util.max_one_step, False)
 
     bank_profit_iterated_max_util_.append(bank_profit_iterated_max_util)
@@ -745,12 +769,13 @@ for i in range(counts_to_average_over):
     successful_loans_1_max_util_.append(successful_loans_1_max_util)
     total_loans_0_max_util_.append(total_loans_0_max_util)
     total_loans_1_max_util_.append(total_loans_1_max_util)
+        
 
-
+    
     ## EO with minimum limit Agent
     # calculates thresholds that maximize EO quantity and bank cash and loans at those thesholds
     # imposes a minimum limit on group 0's threshold such that it is 0.5% repayment certainty
-    OS_eo = OneStep(pi_0 = pi_0_test, pi_1 = pi_1_test)
+    OS_eo = OneStep(pi_0 = pi_0_test, pi_1 = pi_1_test, bank_cash = bank_cash_test)
     (updated_pi_0_eo, updated_pi_1_eo, bank_profit_iterated_eo, earth_mover_distance_initial_eo, earth_mover_distance_after_eo, earth_mover_distance_0_eo, earth_mover_distance_1_eo, change_average_pi_0_eo, change_average_pi_1_eo, total_loans_0_eo, total_loans_1_eo, successful_loans_0_eo, successful_loans_1_eo, successful_loans_total_0_eo, successful_loans_total_1_eo) = OS_eo.iterate(iterations, OS_eo.eo_one_step, False)
 
     bank_profit_iterated_eo_.append(bank_profit_iterated_eo)
@@ -768,10 +793,11 @@ for i in range(counts_to_average_over):
     total_loans_1_eo_.append(total_loans_1_eo)
 
 
+    
     ## EO with NO minimum limit Agent
     # calculates thresholds that maximize EO quantity and bank cash and loans at those thesholds
     # no limit on what group 0's threshold must be
-    OS_eo_no_limit = OneStep(pi_0 = pi_0_test, pi_1 = pi_1_test)
+    OS_eo_no_limit = OneStep(pi_0 = pi_0_test, pi_1 = pi_1_test, bank_cash = bank_cash_test)
     (updated_pi_0_eo_no_limit, updated_pi_1_eo_no_limit, bank_profit_iterated_eo_no_limit, earth_mover_distance_initial_eo_no_limit, earth_mover_distance_after_eo_no_limit, earth_mover_distance_0_eo_no_limit, earth_mover_distance_1_eo_no_limit, change_average_pi_0_eo_no_limit, change_average_pi_1_eo_no_limit, total_loans_0_eo_no_limit, total_loans_1_eo_no_limit, successful_loans_0_eo_no_limit, successful_loans_1_eo_no_limit, successful_loans_total_0_eo_no_limit, successful_loans_total_1_eo_no_limit) = OS_eo_no_limit.iterate(iterations, OS_eo_no_limit.eo_one_step, True)
 
     bank_profit_iterated_eo_no_limit_.append(bank_profit_iterated_eo_no_limit)
@@ -787,8 +813,9 @@ for i in range(counts_to_average_over):
     successful_loans_1_eo_no_limit_.append(successful_loans_1_eo_no_limit)
     total_loans_0_eo_no_limit_.append(total_loans_0_eo_no_limit)
     total_loans_1_eo_no_limit_.append(total_loans_1_eo_no_limit)
-    
+    """  
 
+print(bank_profit_iterated_eo_)
 
 ## print outcomes
 print('\n\n')
@@ -898,6 +925,7 @@ print(numpy.std(total_loans_1_eo_))
 
 
 
+
 print("")
 print("eo NO limit mean")
 print(numpy.mean(bank_profit_iterated_eo_no_limit_))
@@ -930,21 +958,3 @@ print(numpy.std(successful_loans_0_eo_no_limit_))
 print(numpy.std(successful_loans_1_eo_no_limit_))
 print(numpy.std(total_loans_0_eo_no_limit_))
 print(numpy.std(total_loans_1_eo_no_limit_))
-
-
-"""
-print("\n\n")
-print("bank profit: " + str([numpy.mean(bank_profit_iterated_gb_), numpy.mean(bank_profit_iterated_max_util_), numpy.mean(bank_profit_iterated_eo_), numpy.mean(bank_profit_iterated_eo_no_limit_)]))
-print("earth_mover_distance_initial: " + str([numpy.mean(earth_mover_distance_initial_gb_), numpy.mean(earth_mover_distance_initial_max_util_), numpy.mean(earth_mover_distance_initial_eo_), numpy.mean(earth_mover_distance_initial_eo_no_limit_)]))
-print("earth_mover_distance_after: " + str([numpy.mean(earth_mover_distance_after_gb_), numpy.mean(earth_mover_distance_after_max_util_), numpy.mean(earth_mover_distance_after_eo_), numpy.mean(earth_mover_distance_after_eo_no_limit_)]))
-print("earth_mover_distance_0: " + str([numpy.mean(earth_mover_distance_0_gb_), numpy.mean(earth_mover_distance_0_max_util_), numpy.mean(earth_mover_distance_0_eo_), numpy.mean(earth_mover_distance_0_eo_no_limit_)]))
-print("earth_mover_distance_1: " + str([numpy.mean(earth_mover_distance_1_gb_), numpy.mean(earth_mover_distance_1_max_util_), numpy.mean(earth_mover_distance_1_eo_), numpy.mean(earth_mover_distance_1_eo_no_limit_)]))
-print("change_average_pi_0: " + str([numpy.mean(change_average_pi_0_gb_), numpy.mean(change_average_pi_0_max_util_), numpy.mean(change_average_pi_0_eo_), numpy.mean(change_average_pi_0_eo_no_limit_)]))
-print("change_average_pi_1: " + str([numpy.mean(change_average_pi_1_gb_), numpy.mean(change_average_pi_1_max_util_), numpy.mean(change_average_pi_1_eo_), numpy.mean(change_average_pi_1_eo_no_limit_)]))
-print("successful_loans_total_0: " + str([numpy.mean(successful_loans_total_0_gb_), numpy.mean(successful_loans_total_0_max_util_), numpy.mean(successful_loans_total_0_eo_), numpy.mean(successful_loans_total_0_eo_no_limit_)]))
-print("successful_loans_total_1: " + str([numpy.mean(successful_loans_total_1_gb_), numpy.mean(successful_loans_total_1_max_util_), numpy.mean(successful_loans_total_1_eo_), numpy.mean(successful_loans_total_1_eo_no_limit_)]))
-print("successful_loans_0: " + str([numpy.mean(successful_loans_0_gb_), numpy.mean(successful_loans_0_max_util_), numpy.mean(successful_loans_0_eo_), numpy.mean(successful_loans_0_eo_no_limit_)]))
-print("successful_loans_1: " + str([numpy.mean(successful_loans_1_gb_), numpy.mean(successful_loans_1_max_util_), numpy.mean(successful_loans_1_eo_), numpy.mean(successful_loans_1_eo_no_limit_)]))
-print("total_loans_0: " + str([numpy.mean(total_loans_0_gb_), numpy.mean(total_loans_0_max_util_), numpy.mean(total_loans_0_eo_), numpy.mean(total_loans_0_eo_no_limit_)]))
-print("total_loans_1: " + str([numpy.mean(total_loans_1_gb_), numpy.mean(total_loans_1_max_util_), numpy.mean(total_loans_1_eo_), numpy.mean(total_loans_1_eo_no_limit_)]))
-"""
