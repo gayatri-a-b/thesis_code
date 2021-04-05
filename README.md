@@ -18,23 +18,25 @@ pi_0 = [10, 10, 20, 30, 30, 0, 0]
 pi_1 = [0, 10, 10, 20, 30, 30, 0]
 
 # for active harm
-#pi_0_test = [60, 10, 0, 0, 0, 0, 30]
-#pi_1_test  = [0, 0, 40, 10, 0, 0, 50]
+pi_0_test = [60, 10, 0, 0, 0, 0, 30]
+pi_1_test  = [0, 0, 40, 10, 0, 0, 50]
 ```
 
 The agents can be run like this respectively:
 ```python
 OS_gb = OneStep()
-(updated_pi_0_gb, updated_pi_1_gb, bank_profit_iterated_gb, earth_mover_distance_initial_gb, earth_mover_distance_after_gb, change_average_pi_0_gb, change_average_pi_1_gb, total_loans_0_gb, total_loans_1_gb, successful_loans_0_gb, successful_loans_1_gb, successful_loans_total_0_gb, successful_loans_total_1_gb) = OS_gb.iterate(iterations, OS_gb.gb_one_step, False) # always pass in False
+OS_gb = OneStep(pi_0 = pi_0_test, pi_1 = pi_1_test, bank_cash = bank_cash_test)
+(updated_pi_0_gb, updated_pi_1_gb, bank_profit_iterated_gb, earth_mover_distance_initial_gb, earth_mover_distance_after_gb, earth_mover_distance_0_gb, earth_mover_distance_1_gb, change_average_pi_0_gb, change_average_pi_1_gb, total_loans_0_gb, total_loans_1_gb, successful_loans_0_gb, successful_loans_1_gb, successful_loans_total_0_gb, successful_loans_total_1_gb) = OS_gb.iterate(iterations, OS_gb.gb_one_step, False) # always pass in False
 
-OS_max_util = OneStep()
-(updated_pi_0_max_util, updated_pi_1_max_util, bank_profit_iterated_max_util, earth_mover_distance_initial_max_util, earth_mover_distance_after_max_util, change_average_pi_0_max_util, change_average_pi_1_max_util, total_loans_0_max_util, total_loans_1_max_util, successful_loans_0_max_util, successful_loans_1_max_util, successful_loans_total_0_max_util, successful_loans_total_1_max_util) = OS_max_util.iterate(iterations, OS_max_util.max_one_step, False) # always pass in False
+OS_max_util = OneStep(pi_0 = pi_0_test, pi_1 = pi_1_test, bank_cash = bank_cash_test)
+(updated_pi_0_max_util, updated_pi_1_max_util, bank_profit_iterated_max_util, earth_mover_distance_initial_max_util, earth_mover_distance_after_max_util, earth_mover_distance_0_max_util, earth_mover_distance_1_max_util, change_average_pi_0_max_util, change_average_pi_1_max_util, total_loans_0_max_util, total_loans_1_max_util, successful_loans_0_max_util, successful_loans_1_max_util, successful_loans_total_0_max_util, successful_loans_total_1_max_util) = OS_max_util.iterate(iterations, OS_max_util.max_one_step, False) # always pass in False
 
 OS_eo = OneStep()
-(updated_pi_0_eo, updated_pi_1_eo, bank_profit_iterated_eo, earth_mover_distance_initial_eo, earth_mover_distance_after_eo, change_average_pi_0_eo, change_average_pi_1_eo, total_loans_0_eo, total_loans_1_eo, successful_loans_0_eo, successful_loans_1_eo, successful_loans_total_0_eo, successful_loans_total_1_eo) = OS_eo.iterate(iterations, OS_eo.eo_one_step, False) # always pass in False to run EO with limit
+OS_eo = OneStep(pi_0 = pi_0_test, pi_1 = pi_1_test, bank_cash = bank_cash_test)
+(updated_pi_0_eo, updated_pi_1_eo, bank_profit_iterated_eo, earth_mover_distance_initial_eo, earth_mover_distance_after_eo, earth_mover_distance_0_eo, earth_mover_distance_1_eo, change_average_pi_0_eo, change_average_pi_1_eo, total_loans_0_eo, total_loans_1_eo, successful_loans_0_eo, successful_loans_1_eo, successful_loans_total_0_eo, successful_loans_total_1_eo) = OS_eo.iterate(iterations, OS_eo.eo_one_step, False) # always pass in False to run EO with limit
     
-OS_eo_no_limit = OneStep()
-(updated_pi_0_eo_no_limit, updated_pi_1_eo_no_limit, bank_profit_iterated_eo_no_limit, earth_mover_distance_initial_eo_no_limit, earth_mover_distance_after_eo_no_limit, change_average_pi_0_eo_no_limit, change_average_pi_1_eo_no_limit, total_loans_0_eo_no_limit, total_loans_1_eo_no_limit, successful_loans_0_eo_no_limit, successful_loans_1_eo_no_limit, successful_loans_total_0_eo_no_limit, successful_loans_total_1_eo_no_limit) = OS_eo_no_limit.iterate(iterations, OS_eo_no_limit.eo_one_step, True) # always pass in True to run EO with NO limit
+OS_eo_no_limit = OneStep(pi_0 = pi_0_test, pi_1 = pi_1_test, bank_cash = bank_cash_test)
+(updated_pi_0_eo_no_limit, updated_pi_1_eo_no_limit, bank_profit_iterated_eo_no_limit, earth_mover_distance_initial_eo_no_limit, earth_mover_distance_after_eo_no_limit, earth_mover_distance_0_eo_no_limit, earth_mover_distance_1_eo_no_limit, change_average_pi_0_eo_no_limit, change_average_pi_1_eo_no_limit, total_loans_0_eo_no_limit, total_loans_1_eo_no_limit, successful_loans_0_eo_no_limit, successful_loans_1_eo_no_limit, successful_loans_total_0_eo_no_limit, successful_loans_total_1_eo_no_limit) = OS_eo_no_limit.iterate(iterations, OS_eo_no_limit.eo_one_step, True) # always pass in True to run EO with NO limit
 ```
 
 Lastly, there are several variables that the user can pass into the ```OneStep``` class's constructor:
