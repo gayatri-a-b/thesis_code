@@ -49,4 +49,5 @@ group_chance = 0.5, # change of picking each group
 loan_amount = 10, # amount requested on every loan
 interest_rate = 2, # interest rate on every loan
 bank_cash = 10000 # bank starting cash
+bank_minimum = 10000 # minimum amount that bank should have
 ```
