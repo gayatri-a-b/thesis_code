@@ -45,6 +45,6 @@ certainty_0 = [0.1, 0.2, 0.45, 0.6, 0.65, 0.7, 0.7], # repayment certainty for g
 certainty_1 = [0.1, 0.2, 0.45, 0.6, 0.65, 0.7, 0.7], # repayment certainty for group 1 (advantaged group), same for both groups in the model
 group_chance = 0.5, # change of picking each group
 loan_amount = 10, # amount requested on every loan
-interest_rate = 1, # interest rate on every loan
+interest_rate = 2, # interest rate on every loan
 bank_cash = 10000 # bank starting cash
 ```
