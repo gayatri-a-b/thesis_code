@@ -5,7 +5,7 @@ import random
 from scipy import optimize
 from scipy.stats import wasserstein_distance
 
-### READER: tests begin at LINE 705. Begin there.
+### READER: tests begin at LINE 713. Begin there.
 
 numpy.random.seed(10)
 
@@ -416,13 +416,16 @@ class OneStep:
 ########################### AGENTS (ONE STEP)
 ##### take one step -- gb agent
     def gb_one_step(self, ignore):
+        loan = 0
+
         # get person
-        (group, decile, repayment_truth, loan) = self.get_person()
+        while(loan != 1):
+            (group, decile, repayment_truth, loan) = self.get_person()
 
         # increment which group individual is from (loan == 1 is check to make sure individual exists)
         if (group == 0 and loan == 1):
             self.total_individuals_0 += 1
-        elif (group == 1 and loan == 1)::
+        elif (group == 1 and loan == 1):
             self.total_individuals_1 += 1
 
         # if person exists
@@ -449,13 +452,16 @@ class OneStep:
 
 ##### take one step -- max util agent
     def max_one_step(self, ignore):
-        # get person
-        (group, decile, repayment_truth, loan) = self.get_person()
+        loan = 0
 
-        # increment which group individual is from
-        if group == 0:
+        # get person
+        while(loan != 1):
+            (group, decile, repayment_truth, loan) = self.get_person()
+
+        # increment which group individual is from (loan == 1 is check to make sure individual exists)
+        if (group == 0 and loan == 1):
             self.total_individuals_0 += 1
-        else:
+        elif (group == 1 and loan == 1):
             self.total_individuals_1 += 1
 
         # if person exists
@@ -480,14 +486,16 @@ class OneStep:
 
 ##### take one step -- eo agent
     def eo_one_step(self, t_0_lower_limit_given):
+        loan = 0
+
         # get person
-        (group, decile, repayment_truth, loan) = self.get_person()
+        while(loan != 1):
+            (group, decile, repayment_truth, loan) = self.get_person()
 
-        # increment which group individual is from
-        if group == 0:
+        # increment which group individual is from (loan == 1 is check to make sure individual exists)
+        if (group == 0 and loan == 1):
             self.total_individuals_0 += 1
-
-        else:
+        elif (group == 1 and loan == 1):
             self.total_individuals_1 += 1
 
         # if person exists
@@ -726,9 +734,11 @@ for i in range(counts_to_average_over):
         print('iteration: ' + str(i))
 
     # COPY THE AGENT YOU WISH TO RUN HERE, ONLY RUN ONE AGENT AT A TIME
+    
 
 
     """
+    ####### AGENTS
     ## GB Agent 
     # loans if expectated outcome of loan decision does not decrease group's average credit score
     # and bank cash does not dip before its minimum amount
@@ -815,7 +825,6 @@ for i in range(counts_to_average_over):
     total_loans_1_eo_no_limit_.append(total_loans_1_eo_no_limit)
     """  
 
-print(bank_profit_iterated_eo_)
 
 ## print outcomes
 print('\n\n')
@@ -958,3 +967,21 @@ print(numpy.std(successful_loans_0_eo_no_limit_))
 print(numpy.std(successful_loans_1_eo_no_limit_))
 print(numpy.std(total_loans_0_eo_no_limit_))
 print(numpy.std(total_loans_1_eo_no_limit_))
+
+
+"""
+print("\n\n")
+print("bank profit: " + ' '.join(map(str, [numpy.mean(bank_profit_iterated_gb_), numpy.mean(bank_profit_iterated_max_util_), numpy.mean(bank_profit_iterated_eo_), numpy.mean(bank_profit_iterated_eo_no_limit_)])))
+print("earth_mover_distance_initial: " + ' '.join(map(str, [numpy.mean(earth_mover_distance_initial_gb_), numpy.mean(earth_mover_distance_initial_max_util_), numpy.mean(earth_mover_distance_initial_eo_), numpy.mean(earth_mover_distance_initial_eo_no_limit_)])))
+print("earth_mover_distance_after: " + ' '.join(map(str, [numpy.mean(earth_mover_distance_after_gb_), numpy.mean(earth_mover_distance_after_max_util_), numpy.mean(earth_mover_distance_after_eo_), numpy.mean(earth_mover_distance_after_eo_no_limit_)])))
+print("earth_mover_distance_0: " + ' '.join(map(str, [numpy.mean(earth_mover_distance_0_gb_), numpy.mean(earth_mover_distance_0_max_util_), numpy.mean(earth_mover_distance_0_eo_), numpy.mean(earth_mover_distance_0_eo_no_limit_)])))
+print("earth_mover_distance_1: " + ' '.join(map(str, [numpy.mean(earth_mover_distance_1_gb_), numpy.mean(earth_mover_distance_1_max_util_), numpy.mean(earth_mover_distance_1_eo_), numpy.mean(earth_mover_distance_1_eo_no_limit_)])))
+print("change_average_pi_0: " + ' '.join(map(str, [numpy.mean(change_average_pi_0_gb_), numpy.mean(change_average_pi_0_max_util_), numpy.mean(change_average_pi_0_eo_), numpy.mean(change_average_pi_0_eo_no_limit_)])))
+print("change_average_pi_1: " + ' '.join(map(str, [numpy.mean(change_average_pi_1_gb_), numpy.mean(change_average_pi_1_max_util_), numpy.mean(change_average_pi_1_eo_), numpy.mean(change_average_pi_1_eo_no_limit_)])))
+print("successful_loans_total_0: " + ' '.join(map(str, [numpy.mean(successful_loans_total_0_gb_), numpy.mean(successful_loans_total_0_max_util_), numpy.mean(successful_loans_total_0_eo_), numpy.mean(successful_loans_total_0_eo_no_limit_)])))
+print("successful_loans_total_1: " + ' '.join(map(str, [numpy.mean(successful_loans_total_1_gb_), numpy.mean(successful_loans_total_1_max_util_), numpy.mean(successful_loans_total_1_eo_), numpy.mean(successful_loans_total_1_eo_no_limit_)])))
+print("successful_loans_0: " + ' '.join(map(str, [numpy.mean(successful_loans_0_gb_), numpy.mean(successful_loans_0_max_util_), numpy.mean(successful_loans_0_eo_), numpy.mean(successful_loans_0_eo_no_limit_)])))
+print("successful_loans_1: " + ' '.join(map(str, [numpy.mean(successful_loans_1_gb_), numpy.mean(successful_loans_1_max_util_), numpy.mean(successful_loans_1_eo_), numpy.mean(successful_loans_1_eo_no_limit_)])))
+print("total_loans_0: " + ' '.join(map(str, [numpy.mean(total_loans_0_gb_), numpy.mean(total_loans_0_max_util_), numpy.mean(total_loans_0_eo_), numpy.mean(total_loans_0_eo_no_limit_)])))
+print("total_loans_1: " + ' '.join(map(str, [numpy.mean(total_loans_1_gb_), numpy.mean(total_loans_1_max_util_), numpy.mean(total_loans_1_eo_), numpy.mean(total_loans_1_eo_no_limit_)])))
+"""
